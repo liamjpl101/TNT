@@ -1046,7 +1046,10 @@ function maybeSeedIfEmpty() {
     && Object.keys(state.cards).length === 0
     && Object.keys(state.fights).length === 0
     && Object.keys(state.tournaments).length === 0;
-  if (empty) seedImmortalTournamentI(true);
+  if (empty) {
+    seedImmortalTournamentI(true);
+  }
+  seedTNTEvents(true);
 }
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
@@ -2473,6 +2476,99 @@ function deleteTournament(tournamentId) {
 /* ============================================
    ONE-TIME SEEDS
    ============================================ */
+
+function seedTNTEvents(forceRun) {
+  const SEED_KEY = 'tnt_seed_events_v1';
+  const hasTNT1 = Object.values(state.cards).some(c => (c.name || '').toLowerCase() === 'tnt 1: toao vs therighthook');
+  const hasTNT2 = Object.values(state.cards).some(c => (c.name || '').toLowerCase() === 'tnt 2: liamjplindsay vs ruffner');
+  if (hasTNT1 && hasTNT2) {
+    if (!FB_ENABLED) {
+      try { localStorage.setItem(SEED_KEY, 'true'); } catch (e) {}
+    }
+    return;
+  }
+  if (!FB_ENABLED && !forceRun) {
+    try { if (localStorage.getItem(SEED_KEY) === 'true') return; } catch (e) {}
+  }
+
+  const fighterNames = [
+    'TOAO','TheRightHook','ALEKSA7X','maxhollowayfan','Three_Piece_and_a_Sod@','DougLasVegas',
+    'Bird_Man','Justin_Gaethjes_Dog','nicoleszcz','colbycovingtonfan1','JustLetMeBangBro',
+    'MacarenaMMA','Plums','MisterMiracle','QuillianSalkilldfan','Ruddsy','CamoCrusader69',
+    'RZROK_MMA','Olivera','SiamStriker','liamjplindsay','Ruffner','Benny.Garry.theGreat',
+    'QuillanSalkilldfan','prodigypeters2106','Plums.','CrangusMcUFC','conspicuouscasual','NickDiaz125','suga.ko','Kazu'
+  ];
+
+  const existingByName = {};
+  Object.values(state.fighters).forEach(f => { existingByName[f.name.toLowerCase()] = f.id; });
+  const idFor = (name) => {
+    const k = name.toLowerCase();
+    if (existingByName[k]) return existingByName[k];
+    const newId = uid();
+    state.fighters[newId] = { id: newId, name, wins: 0, losses: 0, history: [] };
+    existingByName[k] = newId;
+    return newId;
+  };
+  fighterNames.forEach(idFor);
+
+  const makeFight = (cardId, section, designation, f1, f2, xp1, xp2) => {
+    const id = uid();
+    const fight = {
+      id, cardId, fighter1Id: idFor(f1), fighter2Id: idFor(f2),
+      winnerId: null, loserId: null, section, designation,
+      fighter1XP: xp1, fighter2XP: xp2
+    };
+    state.fights[id] = fight;
+    const winnerId = xp1 > xp2 ? fight.fighter1Id : fight.fighter2Id;
+    const loserId = winnerId === fight.fighter1Id ? fight.fighter2Id : fight.fighter1Id;
+    applyFightResult(fight, winnerId, loserId, Math.max(xp1, xp2), Math.min(xp1, xp2));
+    return id;
+  };
+
+  const tnt1Id = uid();
+  state.cards[tnt1Id] = { id: tnt1Id, name: 'TNT 1: TOAO vs TheRightHook', date: '', createdAt: Date.now(), mainCard: [], prelims: [] };
+  const t1Main = [
+    ['main-event','TOAO','TheRightHook',7523,2575],
+    ['co-main','ALEKSA7X','maxhollowayfan',5140,6013],
+    ['penultimate','Three_Piece_and_a_Sod@','DougLasVegas',3092,5321],
+    ['', 'Bird_Man','Justin_Gaethjes_Dog',4009,4263]
+  ];
+  const t1Pre = [
+    ['featured-prelim','nicoleszcz','colbycovingtonfan1',1968,5603],
+    ['featured-prelim','JustLetMeBangBro','MacarenaMMA',2060,5400],
+    ['','Plums','MisterMiracle',1280,3259],
+    ['','QuillianSalkilldfan','Ruddsy',2853,7936],
+    ['','CamoCrusader69','RZROK_MMA',3548,2214],
+    ['','Olivera','SiamStriker',1571,3946]
+  ];
+  t1Main.forEach(([d,a,b,x,y])=>state.cards[tnt1Id].mainCard.push(makeFight(tnt1Id,'mainCard',d,a,b,x,y)));
+  t1Pre.forEach(([d,a,b,x,y])=>state.cards[tnt1Id].prelims.push(makeFight(tnt1Id,'prelims',d,a,b,x,y)));
+
+  const tnt2Id = uid();
+  state.cards[tnt2Id] = { id: tnt2Id, name: 'TNT 2: liamjplindsay vs Ruffner', date: '', createdAt: Date.now(), mainCard: [], prelims: [] };
+  const t2Main = [
+    ['main-event','liamjplindsay','Ruffner',3820,4447],
+    ['co-main','DougLasVegas','MacarenaMMA',3696,4373],
+    ['penultimate','Benny.Garry.theGreat','QuillanSalkilldfan',4279,2385],
+    ['','TOAO','Ruddsy',1464,4142],
+    ['','maxhollowayfan','colbycovingtonfan1',1852,2409]
+  ];
+  const t2Pre = [
+    ['featured-prelim','ALEKSA7X','Three_Piece_and_a_Sod@',6681,1219],
+    ['','SiamStriker','prodigypeters2106',5053,3912],
+    ['','Plums.','CrangusMcUFC',4348,2416],
+    ['','conspicuouscasual','NickDiaz125',3265,4297],
+    ['','suga.ko','Kazu',3883,2612]
+  ];
+  t2Main.forEach(([d,a,b,x,y])=>state.cards[tnt2Id].mainCard.push(makeFight(tnt2Id,'mainCard',d,a,b,x,y)));
+  t2Pre.forEach(([d,a,b,x,y])=>state.cards[tnt2Id].prelims.push(makeFight(tnt2Id,'prelims',d,a,b,x,y)));
+
+  save();
+  if (!FB_ENABLED) {
+    try { localStorage.setItem(SEED_KEY, 'true'); } catch (e) {}
+  }
+}
+
 function seedImmortalTournamentI(forceRun) {
   const SEED_KEY = 'tnt_seed_immortal_1_v1';
   if (!FB_ENABLED && !forceRun) {
@@ -2545,6 +2641,7 @@ if (FB_ENABLED) {
   loadAuth();
   load();
   seedImmortalTournamentI();
+  seedTNTEvents();
 }
 navigate('home');
 </script>
