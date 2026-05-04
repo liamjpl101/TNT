@@ -794,6 +794,11 @@
     .logo-sub { display: none; }
   }
 </style>
+
+<!-- Firebase SDK (compat builds for simpler integration) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -812,31 +817,79 @@
 
 <script>
 /* ============================================
-   AUTH (single hardcoded admin)
+   FIREBASE CONFIG
+   ============================================
+   Paste your Firebase web config below. Get it from:
+     Firebase Console → Project settings → Your apps → Web app → Firebase SDK snippet → Config
+
+   Until you fill this in, the site falls back to per-browser localStorage
+   (same behavior as before — useful for local testing).
+*/
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAnZwijLe8k1TGiUOZmwNlBKYKmgAeCwf4",
+  authDomain: "texmexfc.firebaseapp.com",
+  projectId: "texmexfc",
+  storageBucket: "texmexfc.firebasestorage.app",
+  messagingSenderId: "940441475381",
+  appId: "1:940441475381:web:32897d3bd560c138fd947c"
+};
+
+const FB_ENABLED = !!FIREBASE_CONFIG.apiKey && typeof firebase !== 'undefined';
+let fbApp = null, fbAuth = null, fbDb = null, fbDocRef = null;
+if (FB_ENABLED) {
+  try {
+    fbApp = firebase.initializeApp(FIREBASE_CONFIG);
+    fbAuth = firebase.auth();
+    fbDb = firebase.firestore();
+    fbDocRef = fbDb.collection('site').doc('state');
+    // Persist auth across reloads
+    fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
+  } catch (e) {
+    console.error('Firebase init failed', e);
+  }
+}
+
+/* ============================================
+   AUTH
    ============================================ */
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'texmexfc';
-const AUTH_KEY = 'tnt_auth_v1';
+const LEGACY_ADMIN_USER = 'admin';
+const LEGACY_ADMIN_PASS = 'texmexfc';
+const LEGACY_AUTH_KEY = 'tnt_auth_v1';
 
 let isAdmin = false;
+let currentUser = null; // Firebase user object (when FB_ENABLED)
 
 function loadAuth() {
-  try { isAdmin = localStorage.getItem(AUTH_KEY) === 'true'; }
+  // localStorage fallback only — Firebase mode uses onAuthStateChanged
+  if (FB_ENABLED) return;
+  try { isAdmin = localStorage.getItem(LEGACY_AUTH_KEY) === 'true'; }
   catch (e) { isAdmin = false; }
 }
 function saveAuth() {
-  try { localStorage.setItem(AUTH_KEY, isAdmin ? 'true' : 'false'); }
+  if (FB_ENABLED) return;
+  try { localStorage.setItem(LEGACY_AUTH_KEY, isAdmin ? 'true' : 'false'); }
   catch (e) {}
 }
-function login(username, password) {
-  if (username === ADMIN_USER && password === ADMIN_PASS) {
+function login(emailOrUser, password) {
+  if (FB_ENABLED) {
+    return fbAuth.signInWithEmailAndPassword(emailOrUser, password)
+      .then(() => true)
+      .catch(err => { console.error('Login failed:', err.code, err.message); return false; });
+  }
+  // Local fallback
+  if (emailOrUser === LEGACY_ADMIN_USER && password === LEGACY_ADMIN_PASS) {
     isAdmin = true;
     saveAuth();
-    return true;
+    return Promise.resolve(true);
   }
-  return false;
+  return Promise.resolve(false);
 }
 function logout() {
+  if (FB_ENABLED) {
+    fbAuth.signOut().catch(err => console.error('Sign out failed', err));
+    closeModal();
+    return;
+  }
   isAdmin = false;
   saveAuth();
   closeModal();
@@ -849,6 +902,21 @@ function requireAdmin() {
     return false;
   }
   return true;
+}
+function authDisplayName() {
+  if (FB_ENABLED && currentUser) return currentUser.email || 'admin';
+  return LEGACY_ADMIN_USER;
+}
+function setupAuthListener() {
+  if (!FB_ENABLED) return;
+  fbAuth.onAuthStateChanged(user => {
+    currentUser = user;
+    isAdmin = !!user;
+    renderNav();
+    render();
+    // If user just logged in and Firestore doc still empty, seed it.
+    if (user) maybeSeedIfEmpty();
+  });
 }
 
 /* ============================================
@@ -879,28 +947,95 @@ let state = {
 let currentPage = 'home';
 let currentParams = {};
 
+function sanitizeState() {
+  if (!state.fighters) state.fighters = {};
+  if (!state.cards) state.cards = {};
+  if (!state.fights) state.fights = {};
+  if (!state.tournaments) state.tournaments = {};
+  Object.values(state.fighters).forEach(f => { if (!f.history) f.history = []; });
+  Object.values(state.cards).forEach(c => {
+    if (!c.mainCard) c.mainCard = [];
+    if (!c.prelims) c.prelims = [];
+  });
+  Object.values(state.tournaments).forEach(t => {
+    if (!t.fighterIds) t.fighterIds = [];
+    if (!t.rounds) t.rounds = [];
+  });
+}
+
+let saveTimer = null;
+let firestoreReady = false; // true once we have a snapshot (or confirmed empty doc)
+
 function save() {
+  if (FB_ENABLED) {
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      if (!isAdmin || !fbDocRef) return;
+      const payload = {
+        fighters: state.fighters,
+        cards: state.cards,
+        fights: state.fights,
+        tournaments: state.tournaments,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      fbDocRef.set(payload).catch(err => {
+        console.error('Firestore save failed', err);
+        alert('Save failed: ' + (err.message || err.code || err));
+      });
+    }, 200);
+    return;
+  }
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
   catch (e) { console.error('Save failed', e); }
 }
+
 function load() {
+  // localStorage fallback only — Firebase mode uses onSnapshot
+  if (FB_ENABLED) return;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       state = { fighters: {}, cards: {}, fights: {}, tournaments: {}, ...parsed };
-      if (!state.tournaments) state.tournaments = {};
-      Object.values(state.fighters).forEach(f => { if (!f.history) f.history = []; });
-      Object.values(state.cards).forEach(c => {
-        if (!c.mainCard) c.mainCard = [];
-        if (!c.prelims) c.prelims = [];
-      });
-      Object.values(state.tournaments).forEach(t => {
-        if (!t.fighterIds) t.fighterIds = [];
-        if (!t.rounds) t.rounds = [];
-      });
+      sanitizeState();
     }
   } catch (e) { console.error('Load failed', e); }
+}
+
+function setupDataListener() {
+  if (!FB_ENABLED || !fbDocRef) return;
+  fbDocRef.onSnapshot(snap => {
+    firestoreReady = true;
+    if (snap.exists) {
+      const data = snap.data() || {};
+      state = {
+        fighters: data.fighters || {},
+        cards: data.cards || {},
+        fights: data.fights || {},
+        tournaments: data.tournaments || {}
+      };
+      sanitizeState();
+      render();
+    } else {
+      // Doc doesn't exist yet — admin will populate it via seed or import.
+      state = { fighters: {}, cards: {}, fights: {}, tournaments: {} };
+      render();
+      maybeSeedIfEmpty();
+    }
+  }, err => {
+    console.error('Firestore listener error', err);
+    alert('Could not connect to live data: ' + (err.message || err.code || err));
+  });
+}
+
+function maybeSeedIfEmpty() {
+  if (!FB_ENABLED || !firestoreReady || !isAdmin) return;
+  // If state is fully empty, run the Immortal Tournament I seed.
+  const empty = Object.keys(state.fighters).length === 0
+    && Object.keys(state.cards).length === 0
+    && Object.keys(state.fights).length === 0
+    && Object.keys(state.tournaments).length === 0;
+  if (empty) seedImmortalTournamentI(true);
 }
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
@@ -952,7 +1087,7 @@ function renderNav() {
   ).join('');
   if (isAdmin) {
     html += `
-      <span class="admin-badge"><span class="dot"></span>${escapeHtml(ADMIN_USER)}</span>
+      <span class="admin-badge"><span class="dot"></span>${escapeHtml(authDisplayName())}</span>
       <button class="nav-btn" onclick="logout()">Logout</button>
     `;
   } else {
@@ -1421,7 +1556,7 @@ function renderLogin() {
     return `
       <div class="page-header"><h1>Account</h1></div>
       <div class="login-card" style="text-align: center;">
-        <div class="admin-badge" style="margin: 0 auto 1rem; display: inline-flex;"><span class="dot"></span>${escapeHtml(ADMIN_USER)}</div>
+        <div class="admin-badge" style="margin: 0 auto 1rem; display: inline-flex;"><span class="dot"></span>${escapeHtml(authDisplayName())}</div>
         <h2 style="margin-bottom: 0.5rem;">You're logged in</h2>
         <p class="meta" style="margin-bottom: 1.5rem;">You have admin privileges. You can add, edit, and delete fighters, events, and tournaments.</p>
         <button class="btn btn-secondary" onclick="logout()">Logout</button>
@@ -1438,14 +1573,15 @@ function renderLogin() {
       </div>
     `;
   }
+  const usingFb = FB_ENABLED;
   return `
     <div class="page-header"><h1>Admin Login</h1></div>
     <div class="login-card">
       <p class="meta" style="margin-bottom: 1.25rem;">Log in to manage TNT fighters, events, and results. Without an account, you can browse the site in read-only mode.</p>
       <div class="form-row">
         <div>
-          <label>Username</label>
-          <input type="text" id="loginUser" placeholder="Username" autocomplete="username" onkeydown="if(event.key==='Enter') doLogin()" />
+          <label>${usingFb ? 'Email' : 'Username'}</label>
+          <input type="${usingFb ? 'email' : 'text'}" id="loginUser" placeholder="${usingFb ? 'admin@example.com' : 'Username'}" autocomplete="${usingFb ? 'email' : 'username'}" onkeydown="if(event.key==='Enter') doLogin()" />
         </div>
       </div>
       <div class="form-row">
@@ -1454,9 +1590,9 @@ function renderLogin() {
           <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()" />
         </div>
       </div>
-      <p id="loginError" class="login-error">Incorrect username or password.</p>
+      <p id="loginError" class="login-error">Incorrect ${usingFb ? 'email' : 'username'} or password.</p>
       <div class="modal-actions" style="margin-top: 1.25rem; justify-content: flex-start;">
-        <button class="btn" onclick="doLogin()">Login</button>
+        <button class="btn" id="loginBtn" onclick="doLogin()">Login</button>
       </div>
     </div>
   `;
@@ -1465,12 +1601,18 @@ function renderLogin() {
 function doLogin() {
   const user = document.getElementById('loginUser').value;
   const pass = document.getElementById('loginPass').value;
-  if (login(user, pass)) {
-    navigate('home');
-  } else {
-    const err = document.getElementById('loginError');
-    if (err) err.style.display = 'block';
-  }
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginError');
+  if (err) err.style.display = 'none';
+  if (btn) { btn.disabled = true; btn.textContent = 'Logging in…'; }
+  Promise.resolve(login(user, pass)).then(ok => {
+    if (btn) { btn.disabled = false; btn.textContent = 'Login'; }
+    if (ok) {
+      navigate('home');
+    } else {
+      if (err) err.style.display = 'block';
+    }
+  });
 }
 
 /* ============================================
@@ -2320,9 +2462,11 @@ function deleteTournament(tournamentId) {
 /* ============================================
    ONE-TIME SEEDS
    ============================================ */
-function seedImmortalTournamentI() {
+function seedImmortalTournamentI(forceRun) {
   const SEED_KEY = 'tnt_seed_immortal_1_v1';
-  try { if (localStorage.getItem(SEED_KEY) === 'true') return; } catch (e) {}
+  if (!FB_ENABLED && !forceRun) {
+    try { if (localStorage.getItem(SEED_KEY) === 'true') return; } catch (e) {}
+  }
 
   const seedNames = [
     'ange', 'MezTT',
@@ -2375,15 +2519,22 @@ function seedImmortalTournamentI() {
   };
 
   save();
-  try { localStorage.setItem(SEED_KEY, 'true'); } catch (e) {}
+  if (!FB_ENABLED) {
+    try { localStorage.setItem(SEED_KEY, 'true'); } catch (e) {}
+  }
 }
 
 /* ============================================
    INIT
    ============================================ */
-loadAuth();
-load();
-seedImmortalTournamentI();
+if (FB_ENABLED) {
+  setupAuthListener();
+  setupDataListener();
+} else {
+  loadAuth();
+  load();
+  seedImmortalTournamentI();
+}
 navigate('home');
 </script>
 
