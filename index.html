@@ -795,7 +795,7 @@
   }
 </style>
 
-<!-- Firebase SDK (compat builds for simpler integration) -->
+<!-- Firebase SDK (compat builds) -->
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
@@ -818,13 +818,7 @@
 <script>
 /* ============================================
    FIREBASE CONFIG
-   ============================================
-   Paste your Firebase web config below. Get it from:
-     Firebase Console → Project settings → Your apps → Web app → Firebase SDK snippet → Config
-
-   Until you fill this in, the site falls back to per-browser localStorage
-   (same behavior as before — useful for local testing).
-*/
+   ============================================ */
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAnZwijLe8k1TGiUOZmwNlBKYKmgAeCwf4",
   authDomain: "texmexfc.firebaseapp.com",
@@ -842,7 +836,6 @@ if (FB_ENABLED) {
     fbAuth = firebase.auth();
     fbDb = firebase.firestore();
     fbDocRef = fbDb.collection('site').doc('state');
-    // Persist auth across reloads
     fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
   } catch (e) {
     console.error('Firebase init failed', e);
@@ -857,10 +850,9 @@ const LEGACY_ADMIN_PASS = 'texmexfc';
 const LEGACY_AUTH_KEY = 'tnt_auth_v1';
 
 let isAdmin = false;
-let currentUser = null; // Firebase user object (when FB_ENABLED)
+let currentUser = null;
 
 function loadAuth() {
-  // localStorage fallback only — Firebase mode uses onAuthStateChanged
   if (FB_ENABLED) return;
   try { isAdmin = localStorage.getItem(LEGACY_AUTH_KEY) === 'true'; }
   catch (e) { isAdmin = false; }
@@ -876,7 +868,6 @@ function login(emailOrUser, password) {
       .then(() => true)
       .catch(err => { console.error('Login failed:', err.code, err.message); return false; });
   }
-  // Local fallback
   if (emailOrUser === LEGACY_ADMIN_USER && password === LEGACY_ADMIN_PASS) {
     isAdmin = true;
     saveAuth();
@@ -914,7 +905,6 @@ function setupAuthListener() {
     isAdmin = !!user;
     renderNav();
     render();
-    // If user just logged in and Firestore doc still empty, seed it.
     if (user) maybeSeedIfEmpty();
   });
 }
@@ -963,8 +953,41 @@ function sanitizeState() {
   });
 }
 
+/* Firestore won't store arrays-of-arrays. Wrap each tournament round in {matches: [...]}
+   on the way out, and unwrap on the way in. */
+function toFirestore(s) {
+  const tournaments = {};
+  Object.entries(s.tournaments || {}).forEach(([id, t]) => {
+    tournaments[id] = {
+      ...t,
+      rounds: (t.rounds || []).map(round => ({ matches: round || [] }))
+    };
+  });
+  return {
+    fighters: s.fighters || {},
+    cards: s.cards || {},
+    fights: s.fights || {},
+    tournaments
+  };
+}
+function fromFirestore(data) {
+  const tournaments = {};
+  Object.entries(data.tournaments || {}).forEach(([id, t]) => {
+    tournaments[id] = {
+      ...t,
+      rounds: (t.rounds || []).map(r => Array.isArray(r) ? r : (r && r.matches ? r.matches : []))
+    };
+  });
+  return {
+    fighters: data.fighters || {},
+    cards: data.cards || {},
+    fights: data.fights || {},
+    tournaments
+  };
+}
+
 let saveTimer = null;
-let firestoreReady = false; // true once we have a snapshot (or confirmed empty doc)
+let firestoreReady = false;
 
 function save() {
   if (FB_ENABLED) {
@@ -972,10 +995,7 @@ function save() {
     saveTimer = setTimeout(() => {
       if (!isAdmin || !fbDocRef) return;
       const payload = {
-        fighters: state.fighters,
-        cards: state.cards,
-        fights: state.fights,
-        tournaments: state.tournaments,
+        ...toFirestore(state),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       };
       fbDocRef.set(payload).catch(err => {
@@ -990,7 +1010,6 @@ function save() {
 }
 
 function load() {
-  // localStorage fallback only — Firebase mode uses onSnapshot
   if (FB_ENABLED) return;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -1007,17 +1026,10 @@ function setupDataListener() {
   fbDocRef.onSnapshot(snap => {
     firestoreReady = true;
     if (snap.exists) {
-      const data = snap.data() || {};
-      state = {
-        fighters: data.fighters || {},
-        cards: data.cards || {},
-        fights: data.fights || {},
-        tournaments: data.tournaments || {}
-      };
+      state = fromFirestore(snap.data() || {});
       sanitizeState();
       render();
     } else {
-      // Doc doesn't exist yet — admin will populate it via seed or import.
       state = { fighters: {}, cards: {}, fights: {}, tournaments: {} };
       render();
       maybeSeedIfEmpty();
@@ -1030,7 +1042,6 @@ function setupDataListener() {
 
 function maybeSeedIfEmpty() {
   if (!FB_ENABLED || !firestoreReady || !isAdmin) return;
-  // If state is fully empty, run the Immortal Tournament I seed.
   const empty = Object.keys(state.fighters).length === 0
     && Object.keys(state.cards).length === 0
     && Object.keys(state.fights).length === 0
