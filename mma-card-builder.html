@@ -1,0 +1,2391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TNT — TexMex Network of Titans</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0c0c10;
+    --bg-2: #16161c;
+    --bg-3: #1f1f28;
+    --bg-4: #2a2a36;
+    --border: #2e2e3a;
+    --text: #f5f5f7;
+    --text-dim: #9ca3af;
+    --accent: #e11d2e;
+    --accent-2: #f59e0b;
+    --accent-hover: #c01525;
+    --gold: #facc15;
+    --green: #22c55e;
+    --red: #ef4444;
+    --blue: #3b82f6;
+  }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 10% 0%, rgba(225, 29, 46, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 90% 100%, rgba(245, 158, 11, 0.05) 0%, transparent 40%);
+    background-attachment: fixed;
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  header {
+    background: linear-gradient(135deg, #16161c 0%, #1f1f28 100%);
+    border-bottom: 3px solid var(--accent);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    line-height: 1;
+  }
+  .logo-icon {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    padding: 0.4rem 0.55rem;
+    border-radius: 6px;
+    font-weight: 900;
+    box-shadow: 0 2px 8px rgba(225,29,46,0.4);
+  }
+  .logo-text { color: var(--accent); }
+  .logo-sub {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 1.5px;
+    margin-left: 0.5rem;
+    font-weight: 600;
+  }
+
+  nav {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .nav-btn {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.15s;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .nav-btn:hover { background: var(--bg-3); border-color: var(--accent); }
+  .nav-btn.active { background: var(--accent); border-color: var(--accent); }
+  .admin-badge {
+    background: rgba(34,197,94,0.15);
+    color: var(--green);
+    border: 1px solid var(--green);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .admin-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+  }
+  .page-header h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .btn-secondary {
+    background: var(--bg-3);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--bg-4); border-color: var(--accent); }
+  .btn-danger { background: var(--red); }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-success { background: var(--green); }
+  .btn-success:hover { background: #16a34a; }
+  .btn-small {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    transition: all 0.15s;
+  }
+  .card.clickable { cursor: pointer; }
+  .card.clickable:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  }
+  .card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .card .meta {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin: 0.2rem 0;
+  }
+
+  .empty {
+    background: var(--bg-2);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--text-dim);
+  }
+  .empty h3 {
+    color: var(--text);
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .stat-box {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .stat-box .num {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-box .label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 0.5rem;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .toolbar input, .toolbar select {
+    background: var(--bg-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.55rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+  .toolbar input { flex: 1; min-width: 200px; }
+
+  .fighter-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .fighter-name {
+    font-weight: 800;
+    font-size: 1.05rem;
+  }
+  .record {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    font-weight: 800;
+    font-size: 0.85rem;
+  }
+  .record .w { color: var(--green); }
+  .record .l { color: var(--red); }
+  .record-sep { color: var(--text-dim); }
+  .meta-line {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+  .xp-display {
+    background: rgba(245,158,11,0.12);
+    color: var(--accent-2);
+    border: 1px solid rgba(245,158,11,0.4);
+    padding: 0.15rem 0.55rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.75rem;
+  }
+
+  .card-section {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+  .badge {
+    color: #fff;
+    padding: 0.2rem 0.55rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-gold {
+    background: var(--gold);
+    color: #1a1a1a;
+  }
+  .badge-blue {
+    background: var(--blue);
+  }
+  .badge-orange {
+    background: var(--accent-2);
+    color: #1a1a1a;
+  }
+
+  .fight-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0;
+  }
+  .fight-row.is-decided { border-color: rgba(34,197,94,0.3); }
+  .fight-fighter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .fight-fighter.right { text-align: right; align-items: flex-end; }
+  .fight-fighter .name {
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .fight-fighter .name:hover { color: var(--accent-2); }
+  .fight-fighter .name.is-winner { color: var(--green); }
+  .fight-fighter .name.is-loser {
+    color: var(--text-dim);
+    text-decoration: line-through;
+    text-decoration-color: rgba(239,68,68,0.5);
+  }
+  .vs {
+    color: var(--text-dim);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    padding: 0 0.5rem;
+  }
+  .fight-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .fight-tags {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.25rem;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+  }
+  .modal {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h2 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    color: var(--accent);
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .form-row > div { display: flex; flex-direction: column; }
+  .form-row label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+  }
+  .form-row input, .form-row select, .form-row textarea {
+    background: var(--bg-3);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.55rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: inherit;
+  }
+  .form-row input:focus, .form-row select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .modal-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .login-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 480px;
+    margin: 1rem auto;
+  }
+  .login-error {
+    color: var(--red);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    display: none;
+  }
+
+  .profile-header {
+    background: linear-gradient(135deg, var(--bg-2) 0%, var(--bg-3) 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .profile-name {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 0.25rem;
+  }
+  .profile-record {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-dim);
+  }
+
+  .history-row {
+    display: grid;
+    grid-template-columns: 50px 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .history-row:last-child { border-bottom: none; }
+  .history-result {
+    font-weight: 900;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+  .history-result.W { color: var(--green); }
+  .history-result.L { color: var(--red); }
+  .opponent-link {
+    cursor: pointer;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .opponent-link:hover { color: var(--accent-2); }
+
+  .event-info {
+    grid-column: 2 / 3;
+    text-align: right;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+
+  .about-hero {
+    background: linear-gradient(135deg, rgba(225,29,46,0.15), rgba(245,158,11,0.05));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .about-hero h1 {
+    font-size: 3rem;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-shadow: 0 2px 12px rgba(225,29,46,0.5);
+  }
+  .about-hero .tagline {
+    color: var(--accent-2);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+  }
+  .about-section {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .about-section h2 {
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    font-size: 1.3rem;
+  }
+  .about-section p { margin-bottom: 0.6rem; color: #d1d5db; }
+  .rule-list {
+    margin: 0.75rem 0 0.75rem 1.5rem;
+  }
+  .rule-list li {
+    margin: 0.4rem 0;
+    color: #d1d5db;
+  }
+  .rule-list li.starred {
+    color: var(--accent-2);
+    font-weight: 600;
+  }
+
+  .view-only-banner {
+    background: rgba(245,158,11,0.1);
+    border: 1px solid var(--accent-2);
+    color: var(--accent-2);
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .view-only-banner button {
+    background: var(--accent-2);
+    color: #1a1a1a;
+    border: none;
+    padding: 0.35rem 0.8rem;
+    border-radius: 4px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .view-only-banner button:hover { background: #eab308; }
+
+  /* ===== BRACKET STYLES ===== */
+  .tournament-meta {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin: 0.25rem 0 1rem;
+  }
+  .champion-banner {
+    background: linear-gradient(135deg, rgba(250,204,21,0.15), rgba(245,158,11,0.08));
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    flex-wrap: wrap;
+  }
+  .champion-banner .crown { font-size: 1.5rem; }
+  .champion-banner .ch-name { font-size: 1.15rem; cursor: pointer; }
+  .champion-banner .ch-name:hover { text-decoration: underline; }
+  .bracket-wrap {
+    overflow-x: auto;
+    padding: 1rem 0.25rem 1.5rem;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .bracket {
+    display: flex;
+    gap: 2.5rem;
+    min-width: max-content;
+    padding: 0.5rem 1.25rem;
+  }
+  .bracket-round {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    min-width: 220px;
+  }
+  .round-label {
+    text-align: center;
+    color: var(--accent-2);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .bracket-match {
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 0.6rem 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .bracket-match.is-final {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px rgba(250,204,21,0.25), 0 4px 16px rgba(250,204,21,0.1);
+  }
+  .bracket-slot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+    cursor: default;
+  }
+  .bracket-slot:last-child { border-bottom: none; }
+  .bracket-slot .slot-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .bracket-slot .slot-name.is-link { cursor: pointer; }
+  .bracket-slot .slot-name.is-link:hover { color: var(--accent-2); }
+  .bracket-slot.is-winner {
+    background: rgba(34,197,94,0.08);
+  }
+  .bracket-slot.is-winner .slot-name { color: var(--green); }
+  .bracket-slot.is-loser .slot-name {
+    color: var(--text-dim);
+    text-decoration: line-through;
+    text-decoration-color: rgba(239,68,68,0.5);
+  }
+  .bracket-slot.is-empty .slot-name {
+    color: var(--text-dim);
+    font-style: italic;
+    font-weight: 500;
+  }
+  .bracket-slot .slot-seed {
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    font-weight: 700;
+    width: 22px;
+    text-align: center;
+  }
+  .bracket-slot .pick-btn {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .bracket-slot .pick-btn:hover { color: var(--green); border-color: var(--green); }
+  .match-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.3rem 0.5rem;
+    gap: 0.25rem;
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
+  }
+  .match-actions button {
+    background: transparent;
+    color: var(--text-dim);
+    border: none;
+    padding: 0.2rem 0.45rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .match-actions button:hover { color: var(--accent); }
+  .seed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.5rem;
+  }
+  .seed-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-3);
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .seed-row label {
+    color: var(--accent-2);
+    font-size: 0.7rem;
+    font-weight: 700;
+    width: 32px;
+    text-align: center;
+  }
+  .seed-row select {
+    flex: 1;
+    background: var(--bg-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.4rem;
+    border-radius: 4px;
+  }
+
+  /* ===== ADMIN TOOLS (export/import) ===== */
+  .admin-tools {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin: 1rem 0 0;
+  }
+  .admin-tools h3 {
+    color: var(--accent-2);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 0.5rem;
+  }
+  .admin-tools p { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1rem; }
+  .admin-tools .tool-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 700px) {
+    main { padding: 1rem; }
+    .fight-row { grid-template-columns: 1fr; text-align: center; }
+    .fight-fighter.right { text-align: center; align-items: center; }
+    .fight-actions { justify-content: center; }
+    .vs { padding: 0.5rem 0; }
+    .history-row { grid-template-columns: 50px 1fr; }
+    .event-info { grid-column: 1 / -1; text-align: left; }
+    .about-hero h1 { font-size: 2rem; }
+    .logo-sub { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo" onclick="navigate('home')">
+      <span class="logo-icon">TNT</span>
+      <span class="logo-text">TexMex Network of Titans</span>
+      <span class="logo-sub">FIGHTING CHAMPIONSHIP</span>
+    </div>
+    <nav id="nav"></nav>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<script>
+/* ============================================
+   AUTH (single hardcoded admin)
+   ============================================ */
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'texmexfc';
+const AUTH_KEY = 'tnt_auth_v1';
+
+let isAdmin = false;
+
+function loadAuth() {
+  try { isAdmin = localStorage.getItem(AUTH_KEY) === 'true'; }
+  catch (e) { isAdmin = false; }
+}
+function saveAuth() {
+  try { localStorage.setItem(AUTH_KEY, isAdmin ? 'true' : 'false'); }
+  catch (e) {}
+}
+function login(username, password) {
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    isAdmin = true;
+    saveAuth();
+    return true;
+  }
+  return false;
+}
+function logout() {
+  isAdmin = false;
+  saveAuth();
+  closeModal();
+  navigate('home');
+}
+function requireAdmin() {
+  if (!isAdmin) {
+    alert('Admin access required. Please log in.');
+    navigate('login');
+    return false;
+  }
+  return true;
+}
+
+/* ============================================
+   STATE & STORAGE
+   ============================================ */
+const STORAGE_KEY = 'tnt_card_builder_v2';
+
+const DESIGNATIONS = {
+  mainCard: [
+    { id: '', label: '— Regular —' },
+    { id: 'main-event', label: 'Main Event' },
+    { id: 'co-main', label: 'Co-Main Event' },
+    { id: 'penultimate', label: 'Penultimate Event' }
+  ],
+  prelims: [
+    { id: '', label: '— Regular —' },
+    { id: 'featured-prelim', label: 'Featured Prelim Bout' }
+  ]
+};
+
+let state = {
+  fighters: {},
+  cards: {},
+  fights: {},
+  tournaments: {}
+};
+
+let currentPage = 'home';
+let currentParams = {};
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch (e) { console.error('Save failed', e); }
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      state = { fighters: {}, cards: {}, fights: {}, tournaments: {}, ...parsed };
+      if (!state.tournaments) state.tournaments = {};
+      Object.values(state.fighters).forEach(f => { if (!f.history) f.history = []; });
+      Object.values(state.cards).forEach(c => {
+        if (!c.mainCard) c.mainCard = [];
+        if (!c.prelims) c.prelims = [];
+      });
+      Object.values(state.tournaments).forEach(t => {
+        if (!t.fighterIds) t.fighterIds = [];
+        if (!t.rounds) t.rounds = [];
+      });
+    }
+  } catch (e) { console.error('Load failed', e); }
+}
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+}
+
+/* ============================================
+   HELPERS
+   ============================================ */
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+function getFighter(id) { return state.fighters[id]; }
+function getCard(id) { return state.cards[id]; }
+function getFight(id) { return state.fights[id]; }
+function getTournament(id) { return state.tournaments[id]; }
+function renderRecord(f) {
+  if (!f) return '';
+  return `<span class="record"><span class="w">${f.wins}</span><span class="record-sep">-</span><span class="l">${f.losses}</span></span>`;
+}
+function getDesignationLabel(section, dId) {
+  if (!dId) return null;
+  const d = (DESIGNATIONS[section] || []).find(x => x.id === dId);
+  return d ? d.label : null;
+}
+function totalXP(fighterId) {
+  const f = getFighter(fighterId);
+  if (!f) return 0;
+  return (f.history || []).reduce((s, h) => s + (h.xpEarned || 0), 0);
+}
+
+/* ============================================
+   ROUTING / NAV
+   ============================================ */
+function renderNav() {
+  const navEl = document.getElementById('nav');
+  if (!navEl) return;
+  const pages = [
+    { id: 'home', label: 'Home' },
+    { id: 'fighters', label: 'Fighters' },
+    { id: 'cards', label: 'Events' },
+    { id: 'tournaments', label: 'Tournaments' },
+    { id: 'about', label: 'About' }
+  ];
+  let html = pages.map(p =>
+    `<button class="nav-btn ${currentPage === p.id ? 'active' : ''}" data-page="${p.id}" onclick="navigate('${p.id}')">${p.label}</button>`
+  ).join('');
+  if (isAdmin) {
+    html += `
+      <span class="admin-badge"><span class="dot"></span>${escapeHtml(ADMIN_USER)}</span>
+      <button class="nav-btn" onclick="logout()">Logout</button>
+    `;
+  } else {
+    html += `<button class="nav-btn ${currentPage === 'login' ? 'active' : ''}" data-page="login" onclick="navigate('login')">Login</button>`;
+  }
+  navEl.innerHTML = html;
+}
+
+function navigate(page, params = {}) {
+  currentPage = page;
+  currentParams = params;
+  render();
+  renderNav();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function render() {
+  const app = document.getElementById('app');
+  switch (currentPage) {
+    case 'home': app.innerHTML = renderHome(); break;
+    case 'fighters': app.innerHTML = renderFighters(); break;
+    case 'cards': app.innerHTML = renderCards(); break;
+    case 'card-detail': app.innerHTML = renderCardDetail(currentParams.id); break;
+    case 'fighter-profile': app.innerHTML = renderFighterProfile(currentParams.id); break;
+    case 'tournaments': app.innerHTML = renderTournaments(); break;
+    case 'tournament-detail': app.innerHTML = renderTournamentDetail(currentParams.id); break;
+    case 'about': app.innerHTML = renderAbout(); break;
+    case 'login': app.innerHTML = renderLogin(); break;
+    default: app.innerHTML = renderHome();
+  }
+}
+
+/* ============================================
+   VIEW-ONLY BANNER
+   ============================================ */
+function viewOnlyBanner() {
+  if (isAdmin) return '';
+  return `
+    <div class="view-only-banner">
+      <span>👁 You're viewing in read-only mode. Log in as admin to edit.</span>
+      <button onclick="navigate('login')">Login</button>
+    </div>
+  `;
+}
+
+/* ============================================
+   PAGE: HOME
+   ============================================ */
+function renderHome() {
+  const fighterCount = Object.keys(state.fighters).length;
+  const cardCount = Object.keys(state.cards).length;
+  const fightCount = Object.keys(state.fights).length;
+  const completedFights = Object.values(state.fights).filter(f => f.winnerId).length;
+
+  const recentCards = Object.values(state.cards)
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+    .slice(0, 4);
+
+  const topFighters = Object.values(state.fighters)
+    .map(f => ({ ...f, xp: totalXP(f.id) }))
+    .sort((a, b) => b.xp - a.xp)
+    .slice(0, 5);
+
+  return `
+    <div class="about-hero" style="padding: 2rem 1.5rem;">
+      <h1>TNT Fighting Championship</h1>
+      <div class="tagline">TexMex Network of Titans</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box"><div class="num">${fighterCount}</div><div class="label">Fighters</div></div>
+      <div class="stat-box"><div class="num">${cardCount}</div><div class="label">Events</div></div>
+      <div class="stat-box"><div class="num">${fightCount}</div><div class="label">Total Fights</div></div>
+      <div class="stat-box"><div class="num">${completedFights}</div><div class="label">Completed</div></div>
+    </div>
+
+    <div class="page-header">
+      <h2>Recent Events</h2>
+      <button class="btn" onclick="navigate('cards')">View All →</button>
+    </div>
+
+    ${recentCards.length === 0 ? `
+      <div class="empty">
+        <h3>No events yet</h3>
+        <p style="margin: 0.5rem 0 1rem;">${isAdmin ? 'Add fighters and book your first TNT event.' : 'No events have been booked yet — check back soon.'}</p>
+        ${isAdmin ? `
+          <button class="btn" onclick="navigate('fighters')">Add Fighters</button>
+          <button class="btn btn-secondary" onclick="navigate('cards')">Create Event</button>
+        ` : ''}
+      </div>
+    ` : `
+      <div class="grid">${recentCards.map(c => renderCardSummary(c)).join('')}</div>
+    `}
+
+    ${topFighters.length > 0 ? `
+      <div style="margin-top: 2rem;" class="page-header">
+        <h2>XP Leaderboard</h2>
+        <button class="btn btn-secondary" onclick="navigate('fighters')">All Fighters →</button>
+      </div>
+      <div class="card-section" style="padding: 0.75rem 1.25rem;">
+        ${topFighters.map((f, i) => `
+          <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0; ${i < topFighters.length - 1 ? 'border-bottom: 1px solid var(--border);' : ''} cursor: pointer;" onclick="navigate('fighter-profile', {id:'${f.id}'})">
+            <div style="font-size: 1.2rem; font-weight: 900; color: ${i === 0 ? 'var(--gold)' : 'var(--text-dim)'}; width: 30px;">#${i + 1}</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 700;">${escapeHtml(f.name)}</div>
+              <div class="meta-line">${renderRecord(f)}</div>
+            </div>
+            <div class="xp-display">${f.xp} XP</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+  `;
+}
+
+function renderCardSummary(card) {
+  const totalFights = (card.mainCard || []).length + (card.prelims || []).length;
+  const completed = [...(card.mainCard || []), ...(card.prelims || [])]
+    .map(getFight).filter(f => f && f.winnerId).length;
+  const mainEvent = (card.mainCard || []).map(getFight).find(f => f && f.designation === 'main-event');
+  let mainEventLabel = '';
+  if (mainEvent) {
+    const f1 = getFighter(mainEvent.fighter1Id);
+    const f2 = getFighter(mainEvent.fighter2Id);
+    if (f1 && f2) mainEventLabel = `${f1.name} vs ${f2.name}`;
+  }
+  return `
+    <div class="card clickable" onclick="navigate('card-detail', {id:'${card.id}'})">
+      <h3>${escapeHtml(card.name)}</h3>
+      ${mainEventLabel ? `<p class="meta" style="color: var(--gold); font-weight: 600;">★ ${escapeHtml(mainEventLabel)}</p>` : ''}
+      <p class="meta">${escapeHtml(card.date || 'No date set')}</p>
+      <p class="meta">${totalFights} fight${totalFights === 1 ? '' : 's'} · ${completed} completed</p>
+    </div>
+  `;
+}
+
+/* ============================================
+   PAGE: FIGHTERS
+   ============================================ */
+function renderFighters() {
+  const fighters = Object.values(state.fighters)
+    .map(f => ({ ...f, xp: totalXP(f.id) }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  return `
+    ${viewOnlyBanner()}
+    <div class="page-header">
+      <h1>Fighters</h1>
+      ${isAdmin ? `<button class="btn" onclick="openAddFighterModal()">+ Add Fighter</button>` : ''}
+    </div>
+
+    ${fighters.length > 0 ? `
+      <div class="toolbar">
+        <input type="text" id="fighterSearch" placeholder="Search fighters..." oninput="filterFighters()" />
+        <select id="sortBy" onchange="filterFighters()">
+          <option value="name">Sort by Name</option>
+          <option value="xp">Sort by XP</option>
+          <option value="wins">Sort by Wins</option>
+        </select>
+      </div>
+    ` : ''}
+
+    ${fighters.length === 0 ? `
+      <div class="empty">
+        <h3>No fighters yet</h3>
+        <p style="margin: 0.5rem 0 1rem;">${isAdmin ? 'Add your first fighter to get the league rolling.' : 'No fighters registered yet.'}</p>
+        ${isAdmin ? `<button class="btn" onclick="openAddFighterModal()">+ Add Fighter</button>` : ''}
+      </div>
+    ` : `
+      <div class="grid" id="fightersGrid">
+        ${fighters.map(f => `
+          <div class="card clickable fighter-item"
+               data-name="${escapeHtml(f.name.toLowerCase())}"
+               data-xp="${f.xp}"
+               data-wins="${f.wins}"
+               onclick="navigate('fighter-profile', {id:'${f.id}'})">
+            <div class="fighter-card-header">
+              <div class="fighter-name">${escapeHtml(f.name)}</div>
+              ${renderRecord(f)}
+            </div>
+            <div class="meta-line"><span class="xp-display">${f.xp} XP</span></div>
+            <p class="meta" style="margin-top: 0.5rem;">${(f.history || []).length} fight${(f.history || []).length === 1 ? '' : 's'}</p>
+          </div>
+        `).join('')}
+      </div>
+    `}
+  `;
+}
+
+function filterFighters() {
+  const q = document.getElementById('fighterSearch').value.toLowerCase().trim();
+  const sortBy = document.getElementById('sortBy').value;
+  const grid = document.getElementById('fightersGrid');
+  if (!grid) return;
+  const items = Array.from(grid.querySelectorAll('.fighter-item'));
+  items.forEach(el => { el.style.display = el.dataset.name.includes(q) ? '' : 'none'; });
+  items.sort((a, b) => {
+    switch (sortBy) {
+      case 'xp': return Number(b.dataset.xp) - Number(a.dataset.xp);
+      case 'wins': return Number(b.dataset.wins) - Number(a.dataset.wins);
+      default: return a.dataset.name.localeCompare(b.dataset.name);
+    }
+  });
+  items.forEach(el => grid.appendChild(el));
+}
+
+/* ============================================
+   PAGE: CARDS
+   ============================================ */
+function renderCards() {
+  const cards = Object.values(state.cards)
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  return `
+    ${viewOnlyBanner()}
+    <div class="page-header">
+      <h1>TNT Events</h1>
+      ${isAdmin ? `<button class="btn" onclick="openAddCardModal()">+ Create Event</button>` : ''}
+    </div>
+    ${cards.length === 0 ? `
+      <div class="empty">
+        <h3>No events yet</h3>
+        <p style="margin: 0.5rem 0 1rem;">${isAdmin ? 'Book your first TNT card.' : 'No events have been booked yet.'}</p>
+        ${isAdmin ? `<button class="btn" onclick="openAddCardModal()">+ Create Event</button>` : ''}
+      </div>
+    ` : `
+      <div class="grid">${cards.map(c => renderCardSummary(c)).join('')}</div>
+    `}
+  `;
+}
+
+/* ============================================
+   PAGE: CARD DETAIL
+   ============================================ */
+function renderCardDetail(cardId) {
+  const card = getCard(cardId);
+  if (!card) {
+    return `<div class="empty"><h3>Event not found</h3><button class="btn" onclick="navigate('cards')">Back to Events</button></div>`;
+  }
+
+  const allFights = [...(card.mainCard || []), ...(card.prelims || [])].map(getFight).filter(Boolean);
+  const allCompleted = allFights.filter(f => f && f.winnerId && f.fighter1XP != null && f.fighter2XP != null);
+
+  // Compute FOTN (smallest XP gap) and POTN (highest winner XP)
+  let fotnId = null, potnId = null;
+  if (allCompleted.length > 0) {
+    const fotn = allCompleted.reduce((best, f) => {
+      const gap = Math.abs((f.fighter1XP || 0) - (f.fighter2XP || 0));
+      if (!best || gap < best.gap) return { gap, id: f.id };
+      return best;
+    }, null);
+    fotnId = fotn ? fotn.id : null;
+    const potn = allCompleted.reduce((best, f) => {
+      const winnerXP = f.winnerId === f.fighter1Id ? f.fighter1XP : f.fighter2XP;
+      if (!best || winnerXP > best.xp) return { xp: winnerXP, id: f.id };
+      return best;
+    }, null);
+    potnId = potn ? potn.id : null;
+  }
+
+  return `
+    ${viewOnlyBanner()}
+    <div class="page-header">
+      <div>
+        <h1>${escapeHtml(card.name)}</h1>
+        <p class="meta">${escapeHtml(card.date || 'No date set')}</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-small" onclick="navigate('cards')">← Back</button>
+        ${isAdmin ? `
+          <button class="btn btn-secondary btn-small" onclick="openEditCardModal('${card.id}')">Edit</button>
+          <button class="btn btn-danger btn-small" onclick="deleteCard('${card.id}')">Delete</button>
+        ` : ''}
+      </div>
+    </div>
+
+    <div class="card-section">
+      <div class="section-title"><span class="badge badge-orange">Main Card</span></div>
+      ${(card.mainCard || []).length === 0
+        ? `<p class="meta">No main card fights yet.</p>`
+        : (card.mainCard || []).map(fid => renderFightRow(fid, fotnId, potnId)).join('')}
+      ${isAdmin ? `<button class="btn btn-small" style="margin-top: 0.75rem;" onclick="openAddFightModal('${card.id}', 'mainCard')">+ Add Main Card Fight</button>` : ''}
+    </div>
+
+    <div class="card-section">
+      <div class="section-title"><span class="badge badge-blue">Prelims</span></div>
+      ${(card.prelims || []).length === 0
+        ? `<p class="meta">No prelim fights yet.</p>`
+        : (card.prelims || []).map(fid => renderFightRow(fid, fotnId, potnId)).join('')}
+      ${isAdmin ? `<button class="btn btn-small" style="margin-top: 0.75rem;" onclick="openAddFightModal('${card.id}', 'prelims')">+ Add Prelim Fight</button>` : ''}
+    </div>
+  `;
+}
+
+function renderFightRow(fightId, fotnId, potnId) {
+  const fight = getFight(fightId);
+  if (!fight) return '';
+  const f1 = getFighter(fight.fighter1Id);
+  const f2 = getFighter(fight.fighter2Id);
+  const f1Name = f1 ? f1.name : '(deleted)';
+  const f2Name = f2 ? f2.name : '(deleted)';
+
+  let f1Class = '', f2Class = '';
+  if (fight.winnerId) {
+    f1Class = fight.winnerId === fight.fighter1Id ? 'is-winner' : 'is-loser';
+    f2Class = fight.winnerId === fight.fighter2Id ? 'is-winner' : 'is-loser';
+  }
+
+  const desigLabel = getDesignationLabel(fight.section, fight.designation);
+  const tags = [];
+  if (desigLabel) tags.push(`<span class="badge badge-orange">${escapeHtml(desigLabel)}</span>`);
+  if (fight.id === potnId) tags.push(`<span class="badge badge-gold">POTN</span>`);
+  if (fight.id === fotnId) tags.push(`<span class="badge badge-blue">FOTN</span>`);
+
+  return `
+    <div class="fight-row ${fight.winnerId ? 'is-decided' : ''}">
+      ${tags.length > 0 ? `<div class="fight-tags">${tags.join('')}</div>` : ''}
+      <div class="fight-fighter">
+        <span class="name ${f1Class}" onclick="${f1 ? `navigate('fighter-profile', {id:'${f1.id}'})` : ''}">${escapeHtml(f1Name)}</span>
+        ${fight.fighter1XP != null ? `<span class="xp-display">${fight.fighter1XP} XP</span>` : ''}
+      </div>
+      <span class="vs">vs</span>
+      <div class="fight-fighter right">
+        <span class="name ${f2Class}" onclick="${f2 ? `navigate('fighter-profile', {id:'${f2.id}'})` : ''}">${escapeHtml(f2Name)}</span>
+        ${fight.fighter2XP != null ? `<span class="xp-display">${fight.fighter2XP} XP</span>` : ''}
+      </div>
+      ${isAdmin ? `
+        <div class="fight-actions">
+          <button class="btn btn-small btn-secondary" onclick="openEditFightModal('${fight.id}')">${fight.winnerId ? 'Edit Result' : 'Set Result'}</button>
+          ${fight.winnerId ? `<button class="btn btn-small btn-secondary" onclick="clearResult('${fight.id}')">Clear</button>` : ''}
+          <button class="btn btn-small btn-danger" onclick="deleteFight('${fight.id}')">Delete</button>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+/* ============================================
+   PAGE: FIGHTER PROFILE
+   ============================================ */
+function renderFighterProfile(fighterId) {
+  const f = getFighter(fighterId);
+  if (!f) {
+    return `<div class="empty"><h3>Fighter not found</h3><button class="btn" onclick="navigate('fighters')">Back to Fighters</button></div>`;
+  }
+  const history = (f.history || []).slice().sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  const wins = history.filter(h => h.result === 'W');
+  const losses = history.filter(h => h.result === 'L');
+  const fights = history.length;
+  const xp = totalXP(fighterId);
+  const avgXP = fights > 0 ? Math.round(xp / fights) : 0;
+
+  function renderHistoryItem(h) {
+    const opp = getFighter(h.opponentId);
+    const card = getCard(h.cardId);
+    return `
+      <div class="history-row">
+        <div class="history-result ${h.result}">${h.result}</div>
+        <div>
+          <span class="opponent-link" onclick="${opp ? `navigate('fighter-profile', {id:'${opp.id}'})` : ''}">${escapeHtml(opp ? opp.name : '(deleted)')}</span>
+          <div class="meta">${h.xpEarned != null ? h.xpEarned + ' XP earned' : ''}</div>
+        </div>
+        <div class="event-info">
+          ${card ? `<span class="opponent-link" onclick="navigate('card-detail', {id:'${card.id}'})">${escapeHtml(card.name)}</span>` : '(event deleted)'}
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    ${viewOnlyBanner()}
+    <div style="margin-bottom: 1rem;">
+      <button class="btn btn-secondary btn-small" onclick="navigate('fighters')">← Back to Fighters</button>
+    </div>
+
+    <div class="profile-header">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <div class="profile-name">${escapeHtml(f.name)}</div>
+          <div class="profile-record">
+            <span style="color: var(--green);">${f.wins}W</span> -
+            <span style="color: var(--red);">${f.losses}L</span>
+          </div>
+        </div>
+        ${isAdmin ? `
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-secondary btn-small" onclick="openEditFighterModal('${f.id}')">Edit</button>
+            <button class="btn btn-danger btn-small" onclick="deleteFighter('${f.id}')">Delete</button>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box"><div class="num" style="color: var(--green);">${f.wins}</div><div class="label">Wins</div></div>
+      <div class="stat-box"><div class="num" style="color: var(--red);">${f.losses}</div><div class="label">Losses</div></div>
+      <div class="stat-box"><div class="num">${fights}</div><div class="label">Total Fights</div></div>
+      <div class="stat-box"><div class="num" style="color: var(--accent-2);">${xp}</div><div class="label">Total XP</div></div>
+      <div class="stat-box"><div class="num" style="color: var(--accent-2);">${avgXP}</div><div class="label">Avg XP</div></div>
+    </div>
+
+    <div class="card-section">
+      <div class="section-title"><span class="badge" style="background: var(--green);">Wins (${wins.length})</span></div>
+      ${wins.length === 0 ? `<p class="meta">No wins yet.</p>` : wins.map(renderHistoryItem).join('')}
+    </div>
+
+    <div class="card-section">
+      <div class="section-title"><span class="badge" style="background: var(--red);">Losses (${losses.length})</span></div>
+      ${losses.length === 0 ? `<p class="meta">No losses yet.</p>` : losses.map(renderHistoryItem).join('')}
+    </div>
+  `;
+}
+
+/* ============================================
+   PAGE: ABOUT
+   ============================================ */
+function renderAbout() {
+  return `
+    <div class="about-hero">
+      <h1>TNT Fighting Championship</h1>
+      <div class="tagline">TexMex Network of Titans</div>
+    </div>
+
+    <div class="about-section">
+      <h2>What is TNT?</h2>
+      <p>The <strong>TexMex Network of Titans (TNT)</strong> is an ongoing MMA-style competition for the Verdict community — complete with prelims, featured prelim bouts, main cards, co-main events, main events, Fight of the Night (FOTN), and Performance of the Night (POTN).</p>
+      <p>TNT is an organization based on real-life MMA promotions like the UFC and RIZIN, but since none of us are out here beating each other to death, it's a whole different ballgame. Players make picks on the VerdictMMA platform and whoever earns the most XP between two opponents takes the W.</p>
+      <p>TNT is the magnum opus and progeny of the original Immortal Tournament — built to push the next era of Verdict competition.</p>
+    </div>
+
+    <div class="about-section">
+      <h2>How It Works</h2>
+      <p>Two opponents are matched up on a card. Both make their picks on VerdictMMA for the underlying real-life event. <strong>Whoever earns the most XP across the event wins their TNT fight.</strong> Winners get a W on their TNT record; losers get an L. Fights happen once — no rematches in the same event, no brackets, no advancing.</p>
+      <p>Special honors are awarded each event: <strong>Performance of the Night</strong> goes to the biggest XP winner of the card, and <strong>Fight of the Night</strong> goes to the closest match.</p>
+    </div>
+
+    <div class="about-section">
+      <h2>The Rules</h2>
+      <ol class="rule-list">
+        <li>There are no brackets — TNT is not a tournament.</li>
+        <li>The bracket system is replaced by 2 separate scoreboards unrelated to each other.</li>
+        <li>These scoreboards run simultaneously and serve as the "preliminary" and "main cards" respectively.</li>
+        <li>There is absolutely NO LIMIT on how many people can fight. 4 people, 30 people — doesn't matter.</li>
+        <li>Fighters compete <strong>once</strong> per event — no rounds, no advancing to another opponent.</li>
+        <li>Fights can be booked by a fighter challenging another fighter, OR hand-picked by the TNT President if a user accepts his offer to compete.</li>
+        <li class="starred">The player who earns the most XP between their opponent wins.</li>
+        <li class="starred">Performance of the Night: the biggest XP winner of the card.</li>
+        <li class="starred">Fight of the Night: the closest match (smallest XP gap).</li>
+      </ol>
+      <p style="margin-top: 1rem; font-style: italic; color: var(--text-dim);">Rules marked with ★ are inherited from Immortal Tournament fundamentals — they have to be on here even though TNT is its own thing.</p>
+    </div>
+
+    <div class="about-section">
+      <h2>Card Structure</h2>
+      <p><strong>Main Card</strong> typically features: Main Event, Co-Main Event, optional Penultimate Event (booked when there's an absolutely wild matchup), and additional fights.</p>
+      <p><strong>Prelim Card</strong> features: Featured Prelim Bout, plus additional prelim fights.</p>
+      <p style="font-style: italic; color: var(--text-dim);">If there's a fight that's wild enough to warrant its own spotlight (think MHF vs Aleksa territory), a second co-main event called the <strong>Penultimate Event</strong> can be booked. No limits.</p>
+    </div>
+  `;
+}
+
+/* ============================================
+   PAGE: LOGIN
+   ============================================ */
+function renderLogin() {
+  if (isAdmin) {
+    return `
+      <div class="page-header"><h1>Account</h1></div>
+      <div class="login-card" style="text-align: center;">
+        <div class="admin-badge" style="margin: 0 auto 1rem; display: inline-flex;"><span class="dot"></span>${escapeHtml(ADMIN_USER)}</div>
+        <h2 style="margin-bottom: 0.5rem;">You're logged in</h2>
+        <p class="meta" style="margin-bottom: 1.5rem;">You have admin privileges. You can add, edit, and delete fighters, events, and tournaments.</p>
+        <button class="btn btn-secondary" onclick="logout()">Logout</button>
+      </div>
+
+      <div class="admin-tools" style="max-width: 480px; margin-left: auto; margin-right: auto;">
+        <h3>Admin Tools</h3>
+        <p>Export all current data (fighters, events, fights, tournaments) as a JSON file. Import a previously exported file to replace the current data — useful for moving data between browsers or origins (e.g. local file → Netlify).</p>
+        <div class="tool-row">
+          <button class="btn btn-small" onclick="exportData()">⤓ Export Data</button>
+          <button class="btn btn-small btn-secondary" onclick="importData()">⤒ Import Data</button>
+          <button class="btn btn-small btn-danger" onclick="resetAllData()">⚠ Wipe All Data</button>
+        </div>
+      </div>
+    `;
+  }
+  return `
+    <div class="page-header"><h1>Admin Login</h1></div>
+    <div class="login-card">
+      <p class="meta" style="margin-bottom: 1.25rem;">Log in to manage TNT fighters, events, and results. Without an account, you can browse the site in read-only mode.</p>
+      <div class="form-row">
+        <div>
+          <label>Username</label>
+          <input type="text" id="loginUser" placeholder="Username" autocomplete="username" onkeydown="if(event.key==='Enter') doLogin()" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Password</label>
+          <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()" />
+        </div>
+      </div>
+      <p id="loginError" class="login-error">Incorrect username or password.</p>
+      <div class="modal-actions" style="margin-top: 1.25rem; justify-content: flex-start;">
+        <button class="btn" onclick="doLogin()">Login</button>
+      </div>
+    </div>
+  `;
+}
+
+function doLogin() {
+  const user = document.getElementById('loginUser').value;
+  const pass = document.getElementById('loginPass').value;
+  if (login(user, pass)) {
+    navigate('home');
+  } else {
+    const err = document.getElementById('loginError');
+    if (err) err.style.display = 'block';
+  }
+}
+
+/* ============================================
+   EXPORT / IMPORT DATA
+   ============================================ */
+function exportData() {
+  if (!requireAdmin()) return;
+  const payload = {
+    _meta: { format: 'tnt-data', version: 1, exportedAt: new Date().toISOString() },
+    fighters: state.fighters,
+    cards: state.cards,
+    fights: state.fights,
+    tournaments: state.tournaments
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const stamp = new Date().toISOString().slice(0,10);
+  a.download = `tnt-data-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function importData() {
+  if (!requireAdmin()) return;
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        if (!parsed || typeof parsed !== 'object' || (!parsed.fighters && !parsed.cards && !parsed.tournaments)) {
+          alert("That doesn't look like a TNT data file.");
+          return;
+        }
+        if (!confirm('This will REPLACE all current data with the imported file. Continue?')) return;
+        state = {
+          fighters: parsed.fighters || {},
+          cards: parsed.cards || {},
+          fights: parsed.fights || {},
+          tournaments: parsed.tournaments || {}
+        };
+        // Sanitize defaults
+        Object.values(state.fighters).forEach(f => { if (!f.history) f.history = []; });
+        Object.values(state.cards).forEach(c => {
+          if (!c.mainCard) c.mainCard = [];
+          if (!c.prelims) c.prelims = [];
+        });
+        Object.values(state.tournaments).forEach(t => {
+          if (!t.fighterIds) t.fighterIds = [];
+          if (!t.rounds) t.rounds = [];
+        });
+        save();
+        alert('Data imported successfully.');
+        navigate('home');
+      } catch (err) {
+        alert('Import failed: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function resetAllData() {
+  if (!requireAdmin()) return;
+  if (!confirm('This will permanently delete ALL fighters, events, fights, and tournaments. This cannot be undone. Continue?')) return;
+  if (!confirm('Are you absolutely sure? Type-checking your soul one last time.')) return;
+  state = { fighters: {}, cards: {}, fights: {}, tournaments: {} };
+  try { localStorage.removeItem('tnt_seed_immortal_1_v1'); } catch (e) {}
+  save();
+  alert('All data wiped. Refreshing.');
+  location.reload();
+}
+
+/* ============================================
+   MODALS
+   ============================================ */
+function showModal(html) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `<div class="modal" onclick="event.stopPropagation()">${html}</div>`;
+  overlay.onclick = closeModal;
+  document.body.appendChild(overlay);
+  setTimeout(() => {
+    const firstInput = overlay.querySelector('input, select');
+    if (firstInput) firstInput.focus();
+  }, 50);
+}
+function closeModal() {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ----- Fighter Modals ----- */
+function openAddFighterModal() {
+  if (!requireAdmin()) return;
+  showModal(`
+    <h2>Add Fighter</h2>
+    <div class="form-row">
+      <div>
+        <label>Fighter Name</label>
+        <input type="text" id="newFighterName" placeholder="e.g. TheRightHook" onkeydown="if(event.key==='Enter') saveNewFighter()" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="saveNewFighter()">Add Fighter</button>
+    </div>
+  `);
+}
+function saveNewFighter() {
+  if (!requireAdmin()) return;
+  const name = document.getElementById('newFighterName').value.trim();
+  if (!name) return alert('Please enter a name.');
+  const id = uid();
+  state.fighters[id] = { id, name, wins: 0, losses: 0, history: [] };
+  save();
+  closeModal();
+  render();
+}
+function openEditFighterModal(fighterId) {
+  if (!requireAdmin()) return;
+  const f = getFighter(fighterId);
+  if (!f) return;
+  showModal(`
+    <h2>Edit Fighter</h2>
+    <div class="form-row">
+      <div>
+        <label>Fighter Name</label>
+        <input type="text" id="editFighterName" value="${escapeHtml(f.name)}" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="saveEditFighter('${f.id}')">Save</button>
+    </div>
+  `);
+}
+function saveEditFighter(fighterId) {
+  if (!requireAdmin()) return;
+  const name = document.getElementById('editFighterName').value.trim();
+  if (!name) return alert('Please enter a name.');
+  state.fighters[fighterId].name = name;
+  save();
+  closeModal();
+  render();
+}
+function deleteFighter(fighterId) {
+  if (!requireAdmin()) return;
+  const f = getFighter(fighterId);
+  if (!f) return;
+  if (!confirm(`Delete ${f.name}? This will remove them from any fights they're booked in.`)) return;
+
+  Object.values(state.fights).forEach(fight => {
+    if (fight.fighter1Id === fighterId || fight.fighter2Id === fighterId) {
+      const card = getCard(fight.cardId);
+      if (card) {
+        card.mainCard = (card.mainCard || []).filter(id => id !== fight.id);
+        card.prelims = (card.prelims || []).filter(id => id !== fight.id);
+      }
+      if (fight.winnerId) {
+        const opponentId = fight.winnerId === fighterId ? fight.loserId : fight.winnerId;
+        const opponent = getFighter(opponentId);
+        if (opponent) {
+          if (fight.winnerId === fighterId) {
+            opponent.losses = Math.max(0, opponent.losses - 1);
+          } else {
+            opponent.wins = Math.max(0, opponent.wins - 1);
+          }
+          opponent.history = (opponent.history || []).filter(h => h.fightId !== fight.id);
+        }
+      }
+      delete state.fights[fight.id];
+    }
+  });
+
+  delete state.fighters[fighterId];
+  save();
+  navigate('fighters');
+}
+
+/* ----- Card Modals ----- */
+function openAddCardModal() {
+  if (!requireAdmin()) return;
+  const today = new Date().toISOString().slice(0, 10);
+  showModal(`
+    <h2>Create TNT Event</h2>
+    <div class="form-row">
+      <div>
+        <label>Event Name</label>
+        <input type="text" id="newCardName" placeholder="e.g. TNT 1: TOAO vs TheRightHook" onkeydown="if(event.key==='Enter') saveNewCard()" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Date (optional)</label>
+        <input type="date" id="newCardDate" value="${today}" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="saveNewCard()">Create Event</button>
+    </div>
+  `);
+}
+function saveNewCard() {
+  if (!requireAdmin()) return;
+  const name = document.getElementById('newCardName').value.trim();
+  const date = document.getElementById('newCardDate').value;
+  if (!name) return alert('Please enter an event name.');
+  const id = uid();
+  state.cards[id] = { id, name, date, createdAt: Date.now(), mainCard: [], prelims: [] };
+  save();
+  closeModal();
+  navigate('card-detail', { id });
+}
+function openEditCardModal(cardId) {
+  if (!requireAdmin()) return;
+  const c = getCard(cardId);
+  if (!c) return;
+  showModal(`
+    <h2>Edit Event</h2>
+    <div class="form-row">
+      <div>
+        <label>Event Name</label>
+        <input type="text" id="editCardName" value="${escapeHtml(c.name)}" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Date</label>
+        <input type="date" id="editCardDate" value="${escapeHtml(c.date || '')}" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="saveEditCard('${c.id}')">Save</button>
+    </div>
+  `);
+}
+function saveEditCard(cardId) {
+  if (!requireAdmin()) return;
+  const name = document.getElementById('editCardName').value.trim();
+  const date = document.getElementById('editCardDate').value;
+  if (!name) return alert('Please enter an event name.');
+  state.cards[cardId].name = name;
+  state.cards[cardId].date = date;
+  save();
+  closeModal();
+  render();
+}
+function deleteCard(cardId) {
+  if (!requireAdmin()) return;
+  const c = getCard(cardId);
+  if (!c) return;
+  if (!confirm(`Delete "${c.name}"? All fights and results from this event will be undone.`)) return;
+  const allFightIds = [...(c.mainCard || []), ...(c.prelims || [])];
+  allFightIds.forEach(fid => {
+    const fight = getFight(fid);
+    if (fight && fight.winnerId) rollbackFightResult(fight);
+    delete state.fights[fid];
+  });
+  delete state.cards[cardId];
+  save();
+  navigate('cards');
+}
+
+/* ----- Fight Modals ----- */
+function openAddFightModal(cardId, section) {
+  if (!requireAdmin()) return;
+  const fighters = Object.values(state.fighters).sort((a,b) => a.name.localeCompare(b.name));
+  if (fighters.length < 2) {
+    alert('You need at least 2 fighters to book a fight. Add some fighters first.');
+    return;
+  }
+  const fighterOptions = fighters.map(f =>
+    `<option value="${f.id}">${escapeHtml(f.name)} (${f.wins}-${f.losses})</option>`
+  ).join('');
+  const desigOptions = (DESIGNATIONS[section] || []).map(d =>
+    `<option value="${d.id}">${escapeHtml(d.label)}</option>`
+  ).join('');
+  showModal(`
+    <h2>Book a ${section === 'mainCard' ? 'Main Card' : 'Prelim'} Fight</h2>
+    <div class="form-row">
+      <div>
+        <label>Fighter 1</label>
+        <select id="newFight1">${fighterOptions}</select>
+      </div>
+      <div>
+        <label>Fighter 2</label>
+        <select id="newFight2">${fighterOptions}</select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Designation</label>
+        <select id="newFightDesignation">${desigOptions}</select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="saveNewFight('${cardId}', '${section}')">Book Fight</button>
+    </div>
+  `);
+}
+function saveNewFight(cardId, section) {
+  if (!requireAdmin()) return;
+  const f1 = document.getElementById('newFight1').value;
+  const f2 = document.getElementById('newFight2').value;
+  const designation = document.getElementById('newFightDesignation').value;
+  if (f1 === f2) return alert('Please pick two different fighters.');
+  const id = uid();
+  state.fights[id] = {
+    id, cardId, fighter1Id: f1, fighter2Id: f2,
+    winnerId: null, loserId: null, section, designation,
+    fighter1XP: null, fighter2XP: null
+  };
+  const card = getCard(cardId);
+  if (section === 'mainCard') card.mainCard.push(id); else card.prelims.push(id);
+  save();
+  closeModal();
+  render();
+}
+function openEditFightModal(fightId) {
+  if (!requireAdmin()) return;
+  const fight = getFight(fightId);
+  if (!fight) return;
+  const f1 = getFighter(fight.fighter1Id);
+  const f2 = getFighter(fight.fighter2Id);
+  if (!f1 || !f2) return alert('One of the fighters has been deleted.');
+  const desigOptions = (DESIGNATIONS[fight.section] || []).map(d =>
+    `<option value="${d.id}" ${d.id === fight.designation ? 'selected' : ''}>${escapeHtml(d.label)}</option>`
+  ).join('');
+  showModal(`
+    <h2>Set Fight Result</h2>
+    <p class="meta" style="margin-bottom: 0.75rem;">Enter the XP each fighter earned. The system will pick the winner from the higher XP value.</p>
+    <div class="form-row">
+      <div>
+        <label>${escapeHtml(f1.name)} XP</label>
+        <input type="number" id="editFightXP1" value="${fight.fighter1XP != null ? fight.fighter1XP : ''}" min="0" />
+      </div>
+      <div>
+        <label>${escapeHtml(f2.name)} XP</label>
+        <input type="number" id="editFightXP2" value="${fight.fighter2XP != null ? fight.fighter2XP : ''}" min="0" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Designation</label>
+        <select id="editFightDesignation">${desigOptions}</select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="saveFightResult('${fight.id}')">Save Result</button>
+    </div>
+  `);
+}
+function saveFightResult(fightId) {
+  if (!requireAdmin()) return;
+  const fight = getFight(fightId);
+  if (!fight) return;
+  const xp1raw = document.getElementById('editFightXP1').value;
+  const xp2raw = document.getElementById('editFightXP2').value;
+  const designation = document.getElementById('editFightDesignation').value;
+
+  if (xp1raw === '' || xp2raw === '') return alert('Enter XP for both fighters.');
+  const xp1 = Number(xp1raw), xp2 = Number(xp2raw);
+  if (Number.isNaN(xp1) || Number.isNaN(xp2)) return alert('XP values must be numbers.');
+  if (xp1 === xp2) return alert('XP cannot be tied — please add a tiebreaker.');
+
+  // If there's an existing result, roll it back first
+  if (fight.winnerId) rollbackFightResult(fight);
+
+  fight.fighter1XP = xp1;
+  fight.fighter2XP = xp2;
+  fight.designation = designation;
+  const winnerId = xp1 > xp2 ? fight.fighter1Id : fight.fighter2Id;
+  const loserId = winnerId === fight.fighter1Id ? fight.fighter2Id : fight.fighter1Id;
+  applyFightResult(fight, winnerId, loserId, xp1 > xp2 ? xp1 : xp2, xp1 > xp2 ? xp2 : xp1);
+  save();
+  closeModal();
+  render();
+}
+function deleteFight(fightId) {
+  if (!requireAdmin()) return;
+  const fight = getFight(fightId);
+  if (!fight) return;
+  if (!confirm('Delete this fight? Any record changes will be undone.')) return;
+  if (fight.winnerId) rollbackFightResult(fight);
+  const card = getCard(fight.cardId);
+  if (card) {
+    card.mainCard = (card.mainCard || []).filter(id => id !== fightId);
+    card.prelims = (card.prelims || []).filter(id => id !== fightId);
+  }
+  delete state.fights[fightId];
+  save();
+  render();
+}
+function applyFightResult(fight, winnerId, loserId, winnerXP, loserXP) {
+  fight.winnerId = winnerId;
+  fight.loserId = loserId;
+  const winner = getFighter(winnerId);
+  const loser = getFighter(loserId);
+  if (!winner || !loser) return;
+  winner.wins = (winner.wins || 0) + 1;
+  loser.losses = (loser.losses || 0) + 1;
+  winner.history = winner.history || [];
+  loser.history = loser.history || [];
+  winner.history.push({
+    opponentId: loserId, result: 'W',
+    fightId: fight.id, cardId: fight.cardId,
+    xpEarned: winnerXP, timestamp: Date.now()
+  });
+  loser.history.push({
+    opponentId: winnerId, result: 'L',
+    fightId: fight.id, cardId: fight.cardId,
+    xpEarned: loserXP, timestamp: Date.now()
+  });
+}
+function clearResult(fightId) {
+  if (!requireAdmin()) return;
+  const fight = getFight(fightId);
+  if (!fight || !fight.winnerId) return;
+  if (!confirm('Clear this result? Both fighters\' records will be updated.')) return;
+  rollbackFightResult(fight);
+  save();
+  render();
+}
+function rollbackFightResult(fight) {
+  if (!fight.winnerId) return;
+  const winner = getFighter(fight.winnerId);
+  const loser = getFighter(fight.loserId);
+  if (winner) {
+    winner.wins = Math.max(0, (winner.wins || 0) - 1);
+    winner.history = (winner.history || []).filter(h => h.fightId !== fight.id);
+  }
+  if (loser) {
+    loser.losses = Math.max(0, (loser.losses || 0) - 1);
+    loser.history = (loser.history || []).filter(h => h.fightId !== fight.id);
+  }
+  fight.winnerId = null;
+  fight.loserId = null;
+  fight.fighter1XP = null;
+  fight.fighter2XP = null;
+}
+
+/* ============================================
+   TOURNAMENTS
+   ============================================ */
+const TOURNAMENT_SIZES = [4, 8, 16, 32];
+
+function roundLabel(roundIdx, totalRounds, t) {
+  if (t && t.roundLabels && t.roundLabels[roundIdx]) {
+    return t.roundLabels[roundIdx];
+  }
+  const fromEnd = totalRounds - 1 - roundIdx;
+  if (fromEnd === 0) return 'Final';
+  if (fromEnd === 1) return 'Semifinals';
+  if (fromEnd === 2) return 'Quarterfinals';
+  if (fromEnd === 3) return 'Round of 16';
+  if (fromEnd === 4) return 'Round of 32';
+  return `Round ${roundIdx + 1}`;
+}
+
+function matchFighters(t, r, m) {
+  if (r === 0) {
+    return [t.fighterIds[m * 2] || null, t.fighterIds[m * 2 + 1] || null];
+  }
+  const prev = t.rounds[r - 1] || [];
+  return [(prev[m * 2] || {}).winnerId || null, (prev[m * 2 + 1] || {}).winnerId || null];
+}
+
+function tournamentChampion(t) {
+  if (!t.rounds || !t.rounds.length) return null;
+  const finalRound = t.rounds[t.rounds.length - 1];
+  if (!finalRound || !finalRound.length) return null;
+  return finalRound[0].winnerId || null;
+}
+
+function tournamentProgress(t) {
+  const total = (t.rounds || []).reduce((s, r) => s + r.length, 0);
+  const done = (t.rounds || []).reduce((s, r) => s + r.filter(m => m.winnerId).length, 0);
+  return { done, total };
+}
+
+function renderTournaments() {
+  const tournaments = Object.values(state.tournaments)
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  return `
+    ${viewOnlyBanner()}
+    <div class="page-header">
+      <h1>Immortal Tournaments</h1>
+      ${isAdmin ? `<button class="btn" onclick="openAddTournamentModal()">+ New Tournament</button>` : ''}
+    </div>
+    <p class="meta" style="margin-bottom: 1.5rem;">
+      The Immortal Tournament is the predecessor of TNT — single-elimination bracket competitions where Verdict players advance round by round until one remains standing.
+    </p>
+    ${tournaments.length === 0 ? `
+      <div class="empty">
+        <h3>No tournaments yet</h3>
+        <p style="margin: 0.5rem 0 1rem;">${isAdmin ? 'Create the first Immortal Tournament to get started.' : 'No tournaments have been recorded yet.'}</p>
+        ${isAdmin ? `<button class="btn" onclick="openAddTournamentModal()">+ New Tournament</button>` : ''}
+      </div>
+    ` : `
+      <div class="grid">
+        ${tournaments.map(t => {
+          const champId = tournamentChampion(t);
+          const champion = champId ? getFighter(champId) : null;
+          const { done, total } = tournamentProgress(t);
+          return `
+            <div class="card clickable" onclick="navigate('tournament-detail', {id:'${t.id}'})">
+              <h3>${escapeHtml(t.name)}</h3>
+              ${champion ? `<p class="meta" style="color: var(--gold); font-weight: 600;">👑 Champion: ${escapeHtml(champion.name)}</p>` : ''}
+              <p class="meta">${escapeHtml(t.date || 'No date set')} · ${t.size}-fighter bracket</p>
+              <p class="meta">${done} / ${total} matches decided</p>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `}
+  `;
+}
+
+function renderTournamentDetail(tournamentId) {
+  const t = getTournament(tournamentId);
+  if (!t) {
+    return `<div class="empty"><h3>Tournament not found</h3><button class="btn" onclick="navigate('tournaments')">Back to Tournaments</button></div>`;
+  }
+  const champId = tournamentChampion(t);
+  const champion = champId ? getFighter(champId) : null;
+  const totalRounds = t.rounds.length;
+
+  return `
+    ${viewOnlyBanner()}
+    <div class="page-header">
+      <div>
+        <h1>${escapeHtml(t.name)}</h1>
+        <div class="tournament-meta">${escapeHtml(t.date || 'No date set')} · ${t.size}-fighter single-elimination bracket</div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-small" onclick="navigate('tournaments')">← Back</button>
+        ${isAdmin ? `
+          <button class="btn btn-secondary btn-small" onclick="openEditTournamentModal('${t.id}')">Edit</button>
+          <button class="btn btn-secondary btn-small" onclick="openSeedTournamentModal('${t.id}')">Edit Seeding</button>
+          <button class="btn btn-danger btn-small" onclick="deleteTournament('${t.id}')">Delete</button>
+        ` : ''}
+      </div>
+    </div>
+
+    ${champion ? `
+      <div class="champion-banner">
+        <span class="crown">👑</span>
+        <div>
+          <div style="font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent-2);">Champion</div>
+          <div class="ch-name" onclick="navigate('fighter-profile', {id:'${champion.id}'})">${escapeHtml(champion.name)}</div>
+        </div>
+      </div>
+    ` : ''}
+
+    ${t.notes ? `<div class="card-section"><p>${escapeHtml(t.notes)}</p></div>` : ''}
+
+    <div class="bracket-wrap">
+      <div class="bracket">
+        ${t.rounds.map((round, rIdx) => `
+          <div class="bracket-round">
+            <div class="round-label">${escapeHtml(roundLabel(rIdx, totalRounds, t))}</div>
+            ${round.map((match, mIdx) => renderBracketMatch(t, rIdx, mIdx, totalRounds)).join('')}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderBracketMatch(t, rIdx, mIdx, totalRounds) {
+  const [f1Id, f2Id] = matchFighters(t, rIdx, mIdx);
+  const match = t.rounds[rIdx][mIdx];
+  const winnerId = match.winnerId || null;
+  const isFinal = rIdx === totalRounds - 1;
+
+  const renderSlot = (fighterId, slotSeed) => {
+    const f = fighterId ? getFighter(fighterId) : null;
+    if (!f) {
+      return `
+        <div class="bracket-slot is-empty">
+          <span class="slot-seed">${slotSeed || ''}</span>
+          <span class="slot-name">TBD</span>
+        </div>
+      `;
+    }
+    let cls = '';
+    if (winnerId) {
+      cls = (winnerId === fighterId) ? 'is-winner' : 'is-loser';
+    }
+    const canPick = isAdmin && !winnerId && f1Id && f2Id;
+    return `
+      <div class="bracket-slot ${cls}">
+        <span class="slot-seed">${slotSeed || ''}</span>
+        <span class="slot-name is-link" onclick="navigate('fighter-profile', {id:'${f.id}'})">${escapeHtml(f.name)}</span>
+        ${canPick ? `<button class="pick-btn" onclick="event.stopPropagation(); pickWinner('${t.id}', ${rIdx}, ${mIdx}, '${f.id}')">Win</button>` : ''}
+      </div>
+    `;
+  };
+
+  const seed1 = rIdx === 0 ? mIdx * 2 + 1 : null;
+  const seed2 = rIdx === 0 ? mIdx * 2 + 2 : null;
+
+  return `
+    <div class="bracket-match ${isFinal ? 'is-final' : ''}">
+      ${renderSlot(f1Id, seed1)}
+      ${renderSlot(f2Id, seed2)}
+      ${isAdmin && winnerId ? `
+        <div class="match-actions">
+          <button onclick="clearMatchWinner('${t.id}', ${rIdx}, ${mIdx})">Reset</button>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function openAddTournamentModal() {
+  if (!requireAdmin()) return;
+  const today = new Date().toISOString().slice(0, 10);
+  showModal(`
+    <h2>Create Immortal Tournament</h2>
+    <div class="form-row">
+      <div>
+        <label>Tournament Name</label>
+        <input type="text" id="newTournamentName" placeholder="e.g. Immortal Tournament I" onkeydown="if(event.key==='Enter') saveNewTournament()" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Date (optional)</label>
+        <input type="date" id="newTournamentDate" value="${today}" />
+      </div>
+      <div>
+        <label>Bracket Size</label>
+        <select id="newTournamentSize">
+          ${TOURNAMENT_SIZES.map(n => `<option value="${n}" ${n === 8 ? 'selected' : ''}>${n} fighters</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Notes (optional)</label>
+        <input type="text" id="newTournamentNotes" placeholder="Brief description or context" />
+      </div>
+    </div>
+    <p class="meta" style="margin-top: 0.5rem;">After creating, you'll set the seeding (which fighter is in each slot).</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="saveNewTournament()">Create</button>
+    </div>
+  `);
+}
+
+function saveNewTournament() {
+  if (!requireAdmin()) return;
+  const name = document.getElementById('newTournamentName').value.trim();
+  const date = document.getElementById('newTournamentDate').value;
+  const size = parseInt(document.getElementById('newTournamentSize').value, 10);
+  const notes = document.getElementById('newTournamentNotes').value.trim();
+  if (!name) return alert('Please enter a tournament name.');
+  if (!TOURNAMENT_SIZES.includes(size)) return alert('Invalid bracket size.');
+
+  const id = uid();
+  const totalRounds = Math.log2(size);
+  const rounds = [];
+  let matches = size / 2;
+  for (let r = 0; r < totalRounds; r++) {
+    rounds.push(Array.from({ length: matches }, () => ({ winnerId: null })));
+    matches = matches / 2;
+  }
+  state.tournaments[id] = {
+    id, name, date, notes, size,
+    fighterIds: Array(size).fill(null),
+    rounds,
+    createdAt: Date.now()
+  };
+  save();
+  closeModal();
+  navigate('tournament-detail', { id });
+}
+
+function openEditTournamentModal(tournamentId) {
+  if (!requireAdmin()) return;
+  const t = getTournament(tournamentId);
+  if (!t) return;
+  const totalRounds = t.rounds.length;
+  const labels = t.roundLabels || [];
+  const labelInputs = Array.from({ length: totalRounds }, (_, r) => `
+    <div class="form-row">
+      <div>
+        <label>${escapeHtml(roundLabel(r, totalRounds))} label (optional)</label>
+        <input type="text" id="editRoundLabel_${r}" value="${escapeHtml(labels[r] || '')}" placeholder="${escapeHtml(roundLabel(r, totalRounds))}" />
+      </div>
+    </div>
+  `).join('');
+  showModal(`
+    <h2>Edit Tournament</h2>
+    <div class="form-row">
+      <div>
+        <label>Name</label>
+        <input type="text" id="editTournamentName" value="${escapeHtml(t.name)}" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Date</label>
+        <input type="date" id="editTournamentDate" value="${escapeHtml(t.date || '')}" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Notes</label>
+        <input type="text" id="editTournamentNotes" value="${escapeHtml(t.notes || '')}" />
+      </div>
+    </div>
+    <p class="meta" style="margin-top: 0.75rem; font-weight: 700; color: var(--accent-2); letter-spacing: 1px; font-size: 0.7rem; text-transform: uppercase;">Custom Round Labels</p>
+    <p class="meta" style="margin-bottom: 0.5rem;">Override the default round names (e.g. "UFC 307: Pereira vs. Roundtree Jr"). Leave blank to use the default.</p>
+    ${labelInputs}
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="saveEditTournament('${t.id}')">Save</button>
+    </div>
+  `);
+}
+
+function saveEditTournament(tournamentId) {
+  if (!requireAdmin()) return;
+  const t = getTournament(tournamentId);
+  if (!t) return;
+  const name = document.getElementById('editTournamentName').value.trim();
+  if (!name) return alert('Please enter a name.');
+  t.name = name;
+  t.date = document.getElementById('editTournamentDate').value;
+  t.notes = document.getElementById('editTournamentNotes').value.trim();
+  const totalRounds = t.rounds.length;
+  const labels = [];
+  for (let r = 0; r < totalRounds; r++) {
+    const el = document.getElementById(`editRoundLabel_${r}`);
+    labels.push(el ? el.value.trim() : '');
+  }
+  t.roundLabels = labels;
+  save();
+  closeModal();
+  render();
+}
+
+function openSeedTournamentModal(tournamentId) {
+  if (!requireAdmin()) return;
+  const t = getTournament(tournamentId);
+  if (!t) return;
+  const fighters = Object.values(state.fighters).sort((a, b) => a.name.localeCompare(b.name));
+  if (fighters.length === 0) {
+    alert('Add some fighters first before seeding the bracket.');
+    return;
+  }
+  const optionsFor = (selectedId) => `
+    <option value="">— Empty —</option>
+    ${fighters.map(f => `<option value="${f.id}" ${selectedId === f.id ? 'selected' : ''}>${escapeHtml(f.name)} (${f.wins}-${f.losses})</option>`).join('')}
+  `;
+  const seedRows = Array.from({ length: t.size }, (_, i) => `
+    <div class="seed-row">
+      <label>#${i + 1}</label>
+      <select id="seedSlot_${i}">${optionsFor(t.fighterIds[i])}</select>
+    </div>
+  `).join('');
+  showModal(`
+    <h2>Edit Seeding</h2>
+    <p class="meta" style="margin-bottom: 1rem;">Slots #1 vs #2 face off in the first match, #3 vs #4 in the second, and so on.</p>
+    <div class="seed-grid">${seedRows}</div>
+    <p class="meta" style="margin-top: 0.75rem; color: var(--accent-2);">⚠ Changing seeding clears any progress already made in the bracket.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="saveSeedTournament('${t.id}')">Save Seeding</button>
+    </div>
+  `);
+}
+
+function saveSeedTournament(tournamentId) {
+  if (!requireAdmin()) return;
+  const t = getTournament(tournamentId);
+  if (!t) return;
+  const newSeeds = [];
+  for (let i = 0; i < t.size; i++) {
+    const v = document.getElementById(`seedSlot_${i}`).value;
+    newSeeds.push(v || null);
+  }
+  const filled = newSeeds.filter(Boolean);
+  if (new Set(filled).size !== filled.length) {
+    return alert('Each fighter can only be seeded once.');
+  }
+  t.fighterIds = newSeeds;
+  t.rounds = t.rounds.map(round => round.map(() => ({ winnerId: null })));
+  save();
+  closeModal();
+  render();
+}
+
+function pickWinner(tournamentId, rIdx, mIdx, fighterId) {
+  if (!requireAdmin()) return;
+  const t = getTournament(tournamentId);
+  if (!t) return;
+  const [f1Id, f2Id] = matchFighters(t, rIdx, mIdx);
+  if (fighterId !== f1Id && fighterId !== f2Id) return;
+  t.rounds[rIdx][mIdx].winnerId = fighterId;
+  save();
+  render();
+}
+
+function clearMatchWinner(tournamentId, rIdx, mIdx) {
+  if (!requireAdmin()) return;
+  const t = getTournament(tournamentId);
+  if (!t) return;
+  if (!confirm('Clear this match result? Any later rounds that depended on it will also be cleared.')) return;
+  t.rounds[rIdx][mIdx].winnerId = null;
+  let depMatchIdx = Math.floor(mIdx / 2);
+  for (let r = rIdx + 1; r < t.rounds.length; r++) {
+    t.rounds[r][depMatchIdx].winnerId = null;
+    depMatchIdx = Math.floor(depMatchIdx / 2);
+  }
+  save();
+  render();
+}
+
+function deleteTournament(tournamentId) {
+  if (!requireAdmin()) return;
+  const t = getTournament(tournamentId);
+  if (!t) return;
+  if (!confirm(`Delete "${t.name}"? This cannot be undone.`)) return;
+  delete state.tournaments[tournamentId];
+  save();
+  navigate('tournaments');
+}
+
+/* ============================================
+   ONE-TIME SEEDS
+   ============================================ */
+function seedImmortalTournamentI() {
+  const SEED_KEY = 'tnt_seed_immortal_1_v1';
+  try { if (localStorage.getItem(SEED_KEY) === 'true') return; } catch (e) {}
+
+  const seedNames = [
+    'ange', 'MezTT',
+    'TheRightHook', 'JustLetMeBangBro',
+    'SenorRosasEnjoyer', 'Three Piece and a Soda',
+    'TairaSZN', 'LCCody789',
+    'maxhollowayfan', 'Jays2006',
+    'PunchDrunkCasuals', 'Ruffner',
+    'Immortal', 'Suga_Sean',
+    'ALEKSAAAAA', 'MACARENAMMA'
+  ];
+
+  const existingByName = {};
+  Object.values(state.fighters).forEach(f => { existingByName[f.name.toLowerCase()] = f.id; });
+  const id = (name) => {
+    const k = name.toLowerCase();
+    if (existingByName[k]) return existingByName[k];
+    const newId = uid();
+    state.fighters[newId] = { id: newId, name, wins: 0, losses: 0, history: [] };
+    existingByName[k] = newId;
+    return newId;
+  };
+  const fighterIds = seedNames.map(id);
+
+  const roundResults = [
+    ['ange', 'JustLetMeBangBro', 'Three Piece and a Soda', 'TairaSZN',
+     'Jays2006', 'Ruffner', 'Suga_Sean', 'ALEKSAAAAA'],
+    ['JustLetMeBangBro', 'TairaSZN', 'Jays2006', 'Suga_Sean'],
+    ['JustLetMeBangBro', 'Suga_Sean'],
+    ['Suga_Sean']
+  ];
+  const rounds = roundResults.map(arr => arr.map(name => ({ winnerId: id(name) })));
+
+  const tId = uid();
+  state.tournaments[tId] = {
+    id: tId,
+    name: 'Immortal Tournament I',
+    date: '',
+    notes: '3rd place: TairaSZN (3414) over Jays2006 (2430).',
+    size: 16,
+    fighterIds,
+    rounds,
+    roundLabels: [
+      'UFC 307: Pereira vs. Roundtree Jr',
+      'UFC FN 244: Royval vs. Taira',
+      'UFC FN 245: Hernandez vs. Pereira',
+      'UFC 308: Topuria vs. Holloway'
+    ],
+    createdAt: Date.now()
+  };
+
+  save();
+  try { localStorage.setItem(SEED_KEY, 'true'); } catch (e) {}
+}
+
+/* ============================================
+   INIT
+   ============================================ */
+loadAuth();
+load();
+seedImmortalTournamentI();
+navigate('home');
+</script>
+
+</body>
+</html>
