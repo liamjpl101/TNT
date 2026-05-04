@@ -1048,8 +1048,8 @@ function maybeSeedIfEmpty() {
     && Object.keys(state.tournaments).length === 0;
   if (empty) {
     seedImmortalTournamentI(true);
-    seedTNTEvents(true);
   }
+  seedTNTEvents(true);
 }
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
@@ -2479,6 +2479,14 @@ function deleteTournament(tournamentId) {
 
 function seedTNTEvents(forceRun) {
   const SEED_KEY = 'tnt_seed_events_v1';
+  const hasTNT1 = Object.values(state.cards).some(c => (c.name || '').toLowerCase() === 'tnt 1: toao vs therighthook');
+  const hasTNT2 = Object.values(state.cards).some(c => (c.name || '').toLowerCase() === 'tnt 2: liamjplindsay vs ruffner');
+  if (hasTNT1 && hasTNT2) {
+    if (!FB_ENABLED) {
+      try { localStorage.setItem(SEED_KEY, 'true'); } catch (e) {}
+    }
+    return;
+  }
   if (!FB_ENABLED && !forceRun) {
     try { if (localStorage.getItem(SEED_KEY) === 'true') return; } catch (e) {}
   }
