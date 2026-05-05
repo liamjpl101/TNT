@@ -988,20 +988,29 @@ function fromFirestore(data) {
 
 let saveTimer = null;
 let firestoreReady = false;
+let localWritePending = false; // true while we have unsaved local changes
 
 function save() {
   if (FB_ENABLED) {
+    // Flag immediately so onSnapshot doesn't clobber our local changes during the debounce
+    localWritePending = true;
     if (saveTimer) clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
-      if (!isAdmin || !fbDocRef) return;
+      if (!isAdmin || !fbDocRef) { localWritePending = false; return; }
       const payload = {
         ...toFirestore(state),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       };
-      fbDocRef.set(payload).catch(err => {
-        console.error('Firestore save failed', err);
-        alert('Save failed: ' + (err.message || err.code || err));
-      });
+      fbDocRef.set(payload)
+        .then(() => {
+          localWritePending = false;
+          render(); // re-render with confirmed local state
+        })
+        .catch(err => {
+          localWritePending = false;
+          console.error('Firestore save failed', err);
+          alert('Save failed: ' + (err.message || err.code || err));
+        });
     }, 200);
     return;
   }
@@ -1025,6 +1034,9 @@ function setupDataListener() {
   if (!FB_ENABLED || !fbDocRef) return;
   fbDocRef.onSnapshot(snap => {
     firestoreReady = true;
+    // If we have local changes queued or in-flight, don't overwrite them with
+    // potentially stale Firestore data — our save() will handle the sync.
+    if (localWritePending) return;
     if (snap.exists) {
       state = fromFirestore(snap.data() || {});
       sanitizeState();
